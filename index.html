@@ -199,14 +199,30 @@
         #map { width: 100%; height: 500px; border-radius: 16px; z-index: 1; }
 
         /* --- ЧАТ БОТ (АЛМА) --- */
-        .chat-widget {
+       .chat-widget {
             position: fixed; bottom: 30px; right: 30px; width: 400px; height: 600px;
-            display: flex; flex-direction: column; z-index: 100;
+            display: flex; flex-direction: column; 
+            z-index: 200; /* Поднимаем выше кнопки вызова */
             transform: translateY(120%); transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
             border: 1px solid rgba(59, 130, 246, 0.4);
+            pointer-events: none; /* Игнорирует клики, когда закрыт */
+            background: rgba(13, 20, 35, 0.95);
+            border-radius: 24px;
+            backdrop-filter: blur(15px);
         }
-        .chat-widget.open { transform: translateY(0); }
+        .chat-widget.open { 
+            transform: translateY(0); 
+            pointer-events: auto; /* Начинает принимать клики, когда открыт */
+        }
         
+        .chat-toggle-btn {
+            position: fixed; bottom: 30px; right: 30px; width: 65px; height: 65px;
+            background: var(--primary); border-radius: 50%; border: none; cursor: pointer;
+            box-shadow: 0 0 30px var(--primary-glow); 
+            z-index: 150; /* Ниже открытого окна чата */
+            transition: 0.4s;
+            display: flex; align-items: center; justify-content: center; font-size: 1.8rem; color: white;
+        }
         .chat-header {
             padding: 1.5rem; background: rgba(13, 20, 35, 0.95); border-bottom: 1px solid var(--glass-border);
             display: flex; align-items: center; gap: 15px; border-radius: 24px 24px 0 0;
