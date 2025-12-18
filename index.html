@@ -99,7 +99,16 @@
         }
 
         /* --- ALMA SIDEBAR --- */
-        .alma-container { position: sticky; top: 2rem; }
+        .alma-container {
+            z-index: 1000; /* Чтобы чат всегда был сверху */
+        }
+
+       /* Сместим кнопку чата чуть правее или ниже, чтобы она не перекрывала инпут */
+        .alma-toggle {
+            bottom: 20px;
+            right: 20px;
+            z-index: 1001;
+        }
         
         .alma-avatar {
             overflow: hidden; padding: 0; position: relative;
