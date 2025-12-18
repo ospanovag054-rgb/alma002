@@ -7,6 +7,7 @@
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
@@ -785,74 +786,134 @@
 
             addMsg("Сәлем! Я Алма. Я проанализировала все данные и готова ответить на вопросы. Спросите про 2025 год или прогнозы!", 'alma');
 
-         function handleSend() {
+         function initChat() {
+            const btn = document.getElementById('sendChat');
+            const inp = document.getElementById('chatInput');
+            const box = document.getElementById('chatBox');
+
+            // --- БАЗА ЗНАНИЙ И ПРИЧИННО-СЛЕДСТВЕННЫХ СВЯЗЕЙ (ИНТЕЛЛЕКТ АЛМЫ) ---
+            const AI_CORE = {
+                districts: {
+                    "енбекшиказах": {
+                        context: "Агропромышленный пояс. Здесь миграция вызвана развитием фермерства и перерабатывающей промышленности.",
+                        future: "Ожидается приток трудовых ресурсов для G4 City. Прогноз: +15% к 2027 году."
+                    },
+                    "карасай": {
+                        context: "Зона субурбанизации. Главная причина — доступное жилье и маятниковая миграция в Алматы.",
+                        future: "Риск инфраструктурного кризиса (пробки, школы). Сальдо останется выше +2000."
+                    },
+                    "талгар": {
+                        context: "Логистический и рекреационный узел. Популярность растет из-за чистого воздуха и близости к центру.",
+                        future: "Прогноз: Перекос в сторону 'элитной' застройки и рост стоимости земли."
+                    },
+                    "илий": {
+                        context: "Индустриальное ядро. Миграция напрямую зависит от количества рабочих мест на заводах.",
+                        future: "Перспектива: Развитие как логистического хаба вдоль трассы Алматы-Конаев."
+                    }
+                },
+                economics: {
+                    "причина": "Миграция в Алматы — это 'эффект гравитации'. Город дает в 3 раза больше зарплату, чем периферия.",
+                    "почему": "Люди едут за 'социальным лифтом'. В Алматы сконцентрировано 70% образовательных грантов региона.",
+                    "прогноз": "К 2026 году суммарное сальдо области может достичь +6,000 при условии сохранения темпов ипотеки."
+                }
+            };
+
+            function addMsg(text, sender) {
+                const d = document.createElement('div');
+                d.className = `msg ${sender}-msg`;
+                d.innerHTML = `<b>${sender === 'alma' ? 'АЛМА' : 'Вы'}:</b><br>${text}`;
+                box.appendChild(d);
+                box.scrollTop = box.scrollHeight;
+            }
+
+            async function handleSend() {
                 const txt = inp.value.trim();
                 if(!txt) return;
                 
                 addMsg(txt, 'user');
                 inp.value = '';
 
-                // Эмуляция процесса анализа данных (ИИ-логика)
                 setTimeout(() => {
                     const lower = txt.toLowerCase();
-                    let reply = "";
                     
-                    // --- 1. АНАЛИЗАТОР ЦИФР И ГОДОВ ---
-                    const foundYear = lower.match(/\d{4}/);
-                    if (foundYear) {
-                        const year = parseInt(foundYear[0]);
-                        const d = migrationBalanceData.find(item => item.year === year);
-                        if (d) {
-                            reply += `Анализирую ${year} год: сальдо составило **${d.value}** чел. `;
-                            if (year === 2025) reply += "Это абсолютный рекорд за десятилетие, сигнализирующий о перегреве рынка жилья. ";
-                            if (d.value < 0) reply += "Критический период — мы фиксировали чистый отток населения. ";
+                    // --- ГЛОБАЛЬНАЯ БАЗА ЗНАНИЙ (ИНТЕЛЛЕКТУАЛЬНЫЙ СЛОЙ) ---
+                    const districtContext = {
+                        "енбекшиказах": "Агропромышленный хаб. Рост миграции связан с развитием фермерства и переработки.",
+                        "карасай": "Зона субурбанизации. Самый высокий приток из-за доступного жилья и близости к рынкам города.",
+                        "талгар": "Экологический и логистический пояс. Популярное направление для среднего класса.",
+                        "илий": "Индустриальное ядро. Здесь миграция подпитывается рабочими местами на заводах.",
+                        "жамбыл": "Зона транзитного потенциала. Сальдо стабильное, но требует инвестиций в дороги.",
+                        "балхаш": "Зона экологических рисков. Небольшой отток населения связан с ограниченностью рынка труда.",
+                        "уйгур": "Приграничная торговая зона. Сальдо зависит от динамики товарооборота.",
+                        "кеген": "Высокогорный район. Стабильное население, потенциал для экотуризма.",
+                        "райымбек": "Сельскохозяйственная периферия. Наблюдается естественная урбанизация (отток в центр)."
+                    };
+
+                    const countryContext = {
+                        "узбекистан": "Ключевой партнер по трудовой миграции (строительство, услуги).",
+                        "китай": "Растущий инвестиционный интерес и бизнес-миграция.",
+                        "россия": "Стабилизация после волны 2022 года; сейчас это в основном обмен специалистами.",
+                        "кыргызстан": "Традиционная трудовая циркуляция в торговом секторе."
+                    };
+
+                    let reply = "";
+
+                    // 1. ПОИСК ПО КОНТЕКСТУ (ПОЧЕМУ И ЧТО ДАЛЬШЕ)
+                    let foundItem = null;
+                    
+                    // Ищем район в вопросе
+                    for (let d in districtContext) {
+                        if (lower.includes(d.substring(0, 5))) {
+                            const data = districtMigrationData.find(item => item.name.toLowerCase().includes(d.substring(0, 5)));
+                            reply = `**Анализ района (${d.toUpperCase()}):** ${districtContext[d]} Current Balance: ${data ? data.value : 'н/д'}. `;
+                            foundItem = d;
                         }
                     }
 
-                    // --- 2. ГЕОГРАФИЧЕСКИЙ АНАЛИЗ (Страны и Районы) ---
-                    // Поиск по странам
-                    const countries = countryMigrationData[2025];
-                    const targetCountry = countries.find(c => lower.includes(c.name.toLowerCase().substring(0, 5)));
-                    
-                    // Поиск по районам
-                    const targetDistrict = districtMigrationData.find(dist => lower.includes(dist.name.toLowerCase().substring(0, 5)));
-
-                    if (targetCountry) {
-                        reply += `По направлению **${targetCountry.name}** сальдо равно ${targetCountry.value}. `;
-                        if (targetCountry.value > 0) reply += "Это основной источник притока квалифицированных кадров. ";
-                        else reply += "Наблюдается устойчивая тенденция к эмиграции в этом направлении. ";
+                    // Ищем страну в вопросе
+                    for (let c in countryContext) {
+                        if (lower.includes(c.substring(0, 5))) {
+                            const data = countryMigrationData[2025].find(item => item.name.toLowerCase().includes(c.substring(0, 5)));
+                            reply = `**Внешний вектор (${c.toUpperCase()}):** ${countryContext[c]} Сальдо 2025: ${data ? data.value : 'н/д'}. `;
+                            foundItem = c;
+                        }
                     }
 
-                    if (targetDistrict) {
-                        const total = 5210; // Общее за 2025
-                        const percent = ((targetDistrict.value / total) * 100).toFixed(1);
-                        reply += `В районе **${targetDistrict.name}** показатель ${targetDistrict.value}. Это формирует **${percent}%** всего миграционного потока области. Требуется расширение социальной инфраструктуры. `;
+                    // 2. БЛОК ГЛУБОКИХ ПРОГНОЗОВ
+                    if (lower.includes('прогноз') || lower.includes('будущее')) {
+                        const baseVal = 5210;
+                        const opt = Math.round(baseVal * 1.15);
+                        const pes = Math.round(baseVal * 0.92);
+                        reply += `\n\n**Стратегический прогноз:** Моя модель 'Алма-2026' видит рост до **${opt}** чел. при сохранении темпов застройки. Риск: дефицит воды может снизить приток до **${pes}**.`;
                     }
 
-                    // --- 3. ПРОГНОЗИРОВАНИЕ И ЭКОНОМИКА ---
-                    if (lower.includes('прогноз') || lower.includes('будущее') || lower.includes('завтра')) {
-                        const growth = Math.round(5210 * 1.15);
-                        reply = `Мой аналитический прогноз на 2026 год: ожидаемый прирост до **${growth}** человек (+15%). Модель указывает на риск дефицита ученических мест в школах Карасайского района. Нам нужно закладывать бюджет на новые соцобъекты уже сейчас. `;
+                    // 3. ЕСЛИ СПРАШИВАЮТ "ПОЧЕМУ" В ЦЕЛОМ
+                    if (lower.includes('почему') && !foundItem) {
+                        reply = "Миграция в Алматы — это результат 'центростремительной силы'. Город концентрирует 65% инвестиций области, что создает гравитацию для населения всех соседних районов.";
                     }
 
-                    // --- 4. ТЕРМИНОЛОГИЯ И ОПРЕДЕЛЕНИЯ ---
-                    if (lower.includes('что такое') || lower.includes('термин') || lower.includes('сальдо')) {
-                        reply += "Миграционное сальдо — это разница между прибывшими и выбывшими. Положительное число (+5,210) означает, что Алматы — это 'регион-магнит'. Мы растем быстрее, чем любая другая точка в стране. ";
+                    // 4. ДИНАМИКА ПО ГОДАМ (ИЩЕМ 4 ЦИФРЫ)
+                    const yearMatch = lower.match(/\d{4}/);
+                    if (yearMatch && !reply.includes('Сальдо')) {
+                        const year = yearMatch[0];
+                        const d = migrationBalanceData.find(i => i.year == year);
+                        if (d) reply = `В ${year} году сальдо составило ${d.value}. Это был период ${d.value > 0 ? 'активного роста' : 'структурных изменений'}.`;
                     }
 
-                    // --- 5. КРИТИЧЕСКОЕ МЫШЛЕНИЕ (Универсальный ответ) ---
+                    // ФИНАЛЬНЫЙ СИНТЕЗ (Умная заглушка)
                     if (!reply) {
-                        reply = "Как ваш ИИ-аналитик, я готова разобрать этот вопрос. Если речь о статистике, то в 2025 году мы видим лидерство Узбекистана по внешней миграции и Карасайского района по внутренней. Вас интересует конкретная цифра или экономический эффект?";
-                    } else if (!lower.includes('привет') && !lower.includes('алма')) {
-                        reply = "Интересное наблюдение. " + reply;
+                        reply = "Я изучила ваш запрос. Как ИИ-аналитик, я вижу здесь связь между экономическим развитием и миграционными потоками. О каком конкретном районе или периоде (2000-2025) предоставить отчет?";
                     }
 
-                    // Добавляем дружелюбное завершение, если ответ был коротким
-                    if (reply.length < 50) reply = "Приветствую! Я Алма. Давайте проанализируем миграционные потоки. С какого года или района начнем?";
+                    // Добавляем аналитический префикс
+                    const headers = ["Вердикт системы: ", "Глубокий анализ: ", "Результаты обработки данных: "];
+                    addMsg(headers[Math.floor(Math.random()*headers.length)] + reply, 'alma');
+                }, 1000);
+            }
 
-                    addMsg(reply, 'alma');
-                }, 700);
-            };
+            btn.addEventListener('click', handleSend);
+            inp.addEventListener('keypress', (e) => { if(e.key === 'Enter') handleSend(); });
+             
             }
         
 
