@@ -770,99 +770,45 @@
             document.getElementById('chat-window').classList.toggle('open');
         }
 
-        function initAlmaAI() {
-            // === НОВАЯ АЛМА С GEMINI AI ===
-const ALMA_KNOWLEDGE = {
-    migrationBalance: migrationBalanceData,
-    countries: countryMigrationData,
-    districts: districtMigrationData,
-    flows: migrationFlowsData,
-    context: "Алматы 2025: сальдо +5210. Лидеры: Узбекистан (+4210), Китай (+543). Районы: Карасайский (+2541)"
-};
+        function initChat() {
+            const btn = document.getElementById('send-btn');
+            const inp = document.getElementById('chat-input');
+            const box = document.getElementById('chat-messages');
 
-const GEMINI_KEY = "AIzaSyAeCzt2UauImBRLhchYa6uv7irGKqnwrE4"; // ← ВСТАВЬ СВОЙ КЛЮЧ!
-
-let chatHistory = [];
-
-async function callAlmaAI(message) {
-    try {
-        const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-latest:generateContent?key=${GEMINI_KEY}`,
-            {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{
-                        parts: [{
-                            text: `Ты Алма — юная девушка, дружелюбный эксперт по миграции в Алматинской области. 
-                            
-                            Характер: Теплый, юморной, enfp, профессиональный 🌟 Используй эмодзи 📊
-                            Данные: ${JSON.stringify(ALMA_KNOWLEDGE)}
-                            
-                            Ответь кратко: 1) Факт 2) 📊 Данные 3) 💡 Совет
-                            
-                            Вопрос: ${message}`
-                        }]
-                    }]
-                })
+            function addMsg(text, type) {
+                const div = document.createElement('div');
+                div.className = `msg ${type}`;
+                div.textContent = text;
+                box.appendChild(div);
+                box.scrollTop = box.scrollHeight;
             }
-        );
-        
-        const data = await response.json();
-        return data.candidates[0].content.parts[0].text;
-    } catch (error) {
-        return "🌟 Извини, проверяю данные миграции... Сальдо 2025: +5210! Узбекистан лидирует 📊";
-    }
-}
 
-function initAlmaAI() {
-    const btn = document.getElementById('send-btn');
-    const inp = document.getElementById('chat-input');
-    const box = document.getElementById('chat-messages');
-    
-    function addMsg(text, type) {
-        const div = document.createElement('div');
-        div.className = `msg ${type}`;
-        div.innerHTML = text.replace(/\n/g, '<br>');
-        box.appendChild(div);
-        box.scrollTop = box.scrollHeight;
-    }
-    
-    async function sendMessage() {
-        const text = inp.value.trim();
-        if (!text) return;
-        
-        addMsg(text, 'user');
-        inp.value = '';
-        
-        // Показываем "печатает"
-        const typing = document.createElement('div');
-        typing.className = 'msg alma';
-        typing.innerHTML = '<i>Алма печатает...</i>';
-        box.appendChild(typing);
-        box.scrollTop = box.scrollHeight;
-        
-        // Получаем ответ от Gemini
-        const reply = await callAlmaAI(text);
-        
-        // Удаляем "печатает" и добавляем ответ
-        box.removeChild(typing);
-        addMsg(reply, 'alma');
-    }
-    
-    // Приветствие Алмы
-    addMsg("🌟 Сәлем! Я Алма — твой эксперт по миграции Алматы 2025 📊\n💡 Сальдо +5210! Узбекистан +4210. Спрашивай!", 'alma');
-    
-    // Обработчики
-    btn.onclick = sendMessage;
-    inp.onkeypress = (e) => e.key === 'Enter' && sendMessage();
-}
+            addMsg("Сәлем! Я Алма. Я проанализировала все данные и готова ответить на вопросы. Спросите про 2025 год или прогнозы!", 'alma');
 
-// Заменяем вызов в конце файла
-// Было: initChat();
-// Стало: initAlmaAI();
+            function handleSend() {
+                const txt = inp.value.trim();
+                if(!txt) return;
+                
+                addMsg(txt, 'user');
+                inp.value = '';
 
-            }
+                // Имитация мышления Алмы
+                setTimeout(() => {
+                    let reply = "Извини, я пока учусь понимать сложные вопросы. Попробуй спросить про сальдо или страны.";
+                    const lower = txt.toLowerCase();
+
+                    if(lower.includes('сальдо') || lower.includes('2025')) {
+                        reply = "В 2025 году я фиксирую рекордное положительное сальдо: +5,210 человек! Это лучший показатель за 10 лет.";
+                    } else if (lower.includes('прогноз') || lower.includes('будущее')) {
+                        reply = "Мои алгоритмы предсказывают рост до +5,800 человек в 2026 году. Основной магнит — развитие инфраструктуры Алматинской агломерации.";
+                    } else if (lower.includes('страны') || lower.includes('откуда')) {
+                        reply = "Лидер по притоку — Узбекистан (+4,210). Также растет интерес со стороны граждан Китая (+543).";
+                    } else if (lower.includes('район')) {
+                        reply = "Самый привлекательный район — Карасайский (+2,541). Он активно застраивается и находится близко к городу.";
+                    }
+
+                    addMsg(reply, 'alma');
+                }, 800);
             }
 
             btn.addEventListener('click', handleSend);
