@@ -792,63 +792,67 @@
                 addMsg(txt, 'user');
                 inp.value = '';
 
-                // Имитация процесса аналитического мышления
+                // Эмуляция процесса анализа данных (ИИ-логика)
                 setTimeout(() => {
                     const lower = txt.toLowerCase();
                     let reply = "";
                     
-                    // --- 1. АНАЛИТИКА ПО ГОДАМ ---
-                    const yearMatch = lower.match(/\d{4}/);
-                    if (yearMatch) {
-                        const year = parseInt(yearMatch[0]);
-                        const yearData = migrationBalanceData.find(d => d.year === year);
-                        if (yearData) {
-                            reply += `Анализирую данные за ${year} год. Сальдо миграции составило ${yearData.value} чел. `;
-                            if (yearData.value > 0) reply += "Это свидетельствует о притоке населения и росте привлекательности региона. ";
-                            else reply += "В тот период наблюдался отток, что часто связано с внешними экономическими факторами. ";
+                    // --- 1. АНАЛИЗАТОР ЦИФР И ГОДОВ ---
+                    const foundYear = lower.match(/\d{4}/);
+                    if (foundYear) {
+                        const year = parseInt(foundYear[0]);
+                        const d = migrationBalanceData.find(item => item.year === year);
+                        if (d) {
+                            reply += `Анализирую ${year} год: сальдо составило **${d.value}** чел. `;
+                            if (year === 2025) reply += "Это абсолютный рекорд за десятилетие, сигнализирующий о перегреве рынка жилья. ";
+                            if (d.value < 0) reply += "Критический период — мы фиксировали чистый отток населения. ";
                         }
                     }
 
-                    // --- 2. АНАЛИТИКА ПО СТРАНАМ ---
-                    const countries = countryMigrationData[2025]; // Берем актуальные данные 2025 года
-                    const matchedCountry = countries.find(c => lower.includes(c.name.toLowerCase().substring(0, 5)));
+                    // --- 2. ГЕОГРАФИЧЕСКИЙ АНАЛИЗ (Страны и Районы) ---
+                    // Поиск по странам
+                    const countries = countryMigrationData[2025];
+                    const targetCountry = countries.find(c => lower.includes(c.name.toLowerCase().substring(0, 5)));
                     
-                    if (matchedCountry) {
-                        reply += `По моим данным, сальдо с такой страной как ${matchedCountry.name} составляет ${matchedCountry.value} чел. `;
-                        if (matchedCountry.value > 4000) reply += "Это наш ключевой миграционный донор. ";
-                        if (matchedCountry.value < 0) reply += "Здесь мы видим отрицательную динамику, что требует изучения причин эмиграции. ";
+                    // Поиск по районам
+                    const targetDistrict = districtMigrationData.find(dist => lower.includes(dist.name.toLowerCase().substring(0, 5)));
+
+                    if (targetCountry) {
+                        reply += `По направлению **${targetCountry.name}** сальдо равно ${targetCountry.value}. `;
+                        if (targetCountry.value > 0) reply += "Это основной источник притока квалифицированных кадров. ";
+                        else reply += "Наблюдается устойчивая тенденция к эмиграции в этом направлении. ";
                     }
 
-                    // --- 3. АНАЛИТИКА ПО РАЙОНАМ ---
-                    const matchedDistrict = districtMigrationData.find(d => lower.includes(d.name.toLowerCase().substring(0, 5)));
-                    if (matchedDistrict) {
-                        reply += `Рассматриваю ${matchedDistrict.name} район. Его показатель: ${matchedDistrict.value}. `;
-                        const totalBalance = migrationBalanceData.find(d => d.year === 2025).value;
-                        const share = ((matchedDistrict.value / totalBalance) * 100).toFixed(1);
-                        reply += `Это составляет примерно **${share}%** от общего сальдо области за 2025 год. `;
+                    if (targetDistrict) {
+                        const total = 5210; // Общее за 2025
+                        const percent = ((targetDistrict.value / total) * 100).toFixed(1);
+                        reply += `В районе **${targetDistrict.name}** показатель ${targetDistrict.value}. Это формирует **${percent}%** всего миграционного потока области. Требуется расширение социальной инфраструктуры. `;
                     }
 
-                    // --- 4. ПРОГНОЗИРОВАНИЕ И КРИТИКА ---
+                    // --- 3. ПРОГНОЗИРОВАНИЕ И ЭКОНОМИКА ---
                     if (lower.includes('прогноз') || lower.includes('будущее') || lower.includes('завтра')) {
-                        const current = 5210; // Данные 2025 года
-                        const predicted = Math.round(current * 1.12); // Рост на 12%
-                        reply = `Основываясь на тренде роста с 2021 года ($-901$) до 2025 года ($+5210$), мой прогноз на 2026 год составляет порядка **${predicted}** человек. Это создаст нагрузку на социальную инфраструктуру, к чему город должен быть готов. `;
+                        const growth = Math.round(5210 * 1.15);
+                        reply = `Мой аналитический прогноз на 2026 год: ожидаемый прирост до **${growth}** человек (+15%). Модель указывает на риск дефицита ученических мест в школах Карасайского района. Нам нужно закладывать бюджет на новые соцобъекты уже сейчас. `;
                     }
 
-                    // --- 5. ТЕРМИНОЛОГИЯ И ДРУЖЕЛЮБНЫЙ ТОН ---
+                    // --- 4. ТЕРМИНОЛОГИЯ И ОПРЕДЕЛЕНИЯ ---
                     if (lower.includes('что такое') || lower.includes('термин') || lower.includes('сальдо')) {
-                        reply += "Миграционное сальдо — это разница между прибывшими и выбывшими. Если оно положительное, значит, Алматы притягивает людей и таланты! ";
+                        reply += "Миграционное сальдо — это разница между прибывшими и выбывшими. Положительное число (+5,210) означает, что Алматы — это 'регион-магнит'. Мы растем быстрее, чем любая другая точка в стране. ";
                     }
 
-                    // --- 6. УМНАЯ ЗАГЛУШКА (Если вопрос общий) ---
+                    // --- 5. КРИТИЧЕСКОЕ МЫШЛЕНИЕ (Универсальный ответ) ---
                     if (!reply) {
-                        reply = "Как ваш аналитик, я могу разобрать любой аспект миграции: от лидерства Узбекистана в притоке до строительного бума в Карасайском районе. Какой из этих графиков мы изучим подробнее?";
+                        reply = "Как ваш ИИ-аналитик, я готова разобрать этот вопрос. Если речь о статистике, то в 2025 году мы видим лидерство Узбекистана по внешней миграции и Карасайского района по внутренней. Вас интересует конкретная цифра или экономический эффект?";
                     } else if (!lower.includes('привет') && !lower.includes('алма')) {
-                        reply = "Интересный вопрос! " + reply;
+                        reply = "Интересное наблюдение. " + reply;
                     }
+
+                    // Добавляем дружелюбное завершение, если ответ был коротким
+                    if (reply.length < 50) reply = "Приветствую! Я Алма. Давайте проанализируем миграционные потоки. С какого года или района начнем?";
 
                     addMsg(reply, 'alma');
-                }, 600);
+                }, 700);
+            };
             }
         
 
