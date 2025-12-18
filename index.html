@@ -784,48 +784,139 @@
         }
 
         function initChat() {
-            const btn = document.getElementById('send-btn');
-            const inp = document.getElementById('chat-input');
-            const box = document.getElementById('chat-messages');
+    const btn = document.getElementById('send-btn');
+    const inp = document.getElementById('chat-input');
+    const box = document.getElementById('chat-messages');
 
-            function addMsg(text, type) {
-                const div = document.createElement('div');
-                div.className = `msg ${type}`;
-                div.textContent = text;
-                box.appendChild(div);
-                box.scrollTop = box.scrollHeight;
+    // безопасное экранирование текста
+    function escapeHtml(str){
+        return str
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    // единый метод добавления сообщений (использует CSS .msg.alma / .msg.user)
+    function appendMessage(textHtml, role) {
+        const d = document.createElement('div');
+        d.className = `msg ${role === 'user' ? 'user' : 'alma'}`;
+        d.innerHTML = textHtml;
+        box.appendChild(d);
+        box.scrollTop = box.scrollHeight;
+    }
+
+    // приветствие
+    appendMessage("<b>АЛМА:</b><br>Сәлем! Я Алма. Я проанализировала все данные и готова ответить на вопросы. Спросите про 2025 год или прогнозы!", 'alma');
+
+    // --- БАЗА ЗНАНИЙ И ПРИЧИННО-СЛЕДСТВЕННЫХ СВЯЗЕЙ (ИНТЕЛЛЕКТ АЛМЫ) ---
+    const AI_CORE = {
+        districts: {
+            "енбекшиказах": {
+                context: "Агропромышленный пояс. Здесь миграция вызвана развитием фермерства и перерабатывающей промышленности.",
+                future: "Ожидается приток трудовых ресурсов для G4 City. Прогноз: +15% к 2027 году."
+            },
+            "карасай": {
+                context: "Зона субурбанизации. Главная причина — доступное жилье и маятниковая миграция в Алматы.",
+                future: "Риск инфраструктурного кризиса (пробки, школы). Сальдо останется выше +2000."
+            },
+            "талгар": {
+                context: "Логистический и рекреационный узел. Популярность растет из-за чистого воздуха и близости к центру.",
+                future: "Прогноз: Перекос в сторону 'элитной' застройки и рост стоимости земли."
+            },
+            "илий": {
+                context: "Индустриальное ядро. Миграция напрямую зависит от количества рабочих мест на заводах.",
+                future: "Перспектива: Развитие как логистического хаба вдоль трассы Алматы-Конаев."
+            }
+        },
+        economics: {
+            "причина": "Миграция в Алматы — это 'эффект гравитации'. Город дает в 3 раза больше зарплату, чем периферия.",
+            "почему": "Люди едут за 'социальным лифтом'. В Алматы сконцентрировано 70% образовательных грантов региона.",
+            "прогноз": "К 2026 году суммарное сальдо области может достичь +6,000 при условии сохранения темпов ипотеки."
+        }
+    };
+
+    // основной обработчик отправки
+    async function handleSend() {
+        const txt = inp.value.trim();
+        if (!txt) return;
+
+        // показать сообщение пользователя
+        appendMessage(`<b>Вы:</b><br>${escapeHtml(txt)}`, 'user');
+        inp.value = '';
+        inp.focus();
+
+        // индикатор "думает"
+        appendMessage("<i>АЛМА: анализирую...</i>", 'alma');
+
+        setTimeout(() => {
+            // удаляем последний временный "анализирую"
+            const almaMsgs = box.querySelectorAll('.msg.alma');
+            const lastAlma = almaMsgs[almaMsgs.length - 1];
+            if (lastAlma && lastAlma.innerHTML.includes('анализирую')) {
+                lastAlma.remove();
             }
 
-            addMsg("Сәлем! Я Алма. Я проанализировала все данные и готова ответить на вопросы. Спросите про 2025 год или прогнозы!", 'alma');
+            // простая логика ответа — можно расширять
+            const lower = txt.toLowerCase();
+            let reply = "";
 
-        
-
-            // --- БАЗА ЗНАНИЙ И ПРИЧИННО-СЛЕДСТВЕННЫХ СВЯЗЕЙ (ИНТЕЛЛЕКТ АЛМЫ) ---
-            const AI_CORE = {
-                districts: {
-                    "енбекшиказах": {
-                        context: "Агропромышленный пояс. Здесь миграция вызвана развитием фермерства и перерабатывающей промышленности.",
-                        future: "Ожидается приток трудовых ресурсов для G4 City. Прогноз: +15% к 2027 году."
-                    },
-                    "карасай": {
-                        context: "Зона субурбанизации. Главная причина — доступное жилье и маятниковая миграция в Алматы.",
-                        future: "Риск инфраструктурного кризиса (пробки, школы). Сальдо останется выше +2000."
-                    },
-                    "талгар": {
-                        context: "Логистический и рекреационный узел. Популярность растет из-за чистого воздуха и близости к центру.",
-                        future: "Прогноз: Перекос в сторону 'элитной' застройки и рост стоимости земли."
-                    },
-                    "илий": {
-                        context: "Индустриальное ядро. Миграция напрямую зависит от количества рабочих мест на заводах.",
-                        future: "Перспектива: Развитие как логистического хаба вдоль трассы Алматы-Конаев."
-                    }
-                },
-                economics: {
-                    "причина": "Миграция в Алматы — это 'эффект гравитации'. Город дает в 3 раза больше зарплату, чем периферия.",
-                    "почему": "Люди едут за 'социальным лифтом'. В Алматы сконцентрировано 70% образовательных грантов региона.",
-                    "прогноз": "К 2026 году суммарное сальдо области может достичь +6,000 при условии сохранения темпов ипотеки."
+            // 1) ищем район (по ключевым подстрокам)
+            for (let key in AI_CORE.districts) {
+                if (lower.includes(key.substring(0, 5))) {
+                    const ctx = AI_CORE.districts[key].context;
+                    const fut = AI_CORE.districts[key].future;
+                    reply = `<b>Анализ района (${key.toUpperCase()}):</b><br>${escapeHtml(ctx)}<br><i>${escapeHtml(fut)}</i>`;
+                    break;
                 }
-            };
+            }
+
+            // 2) ищем страну (простая проверка по названиям)
+            const countries = ["узбекистан","китай","россия","кыргызстан","таджикистан"];
+            if (!reply) {
+                for (let c of countries) {
+                    if (lower.includes(c.substring(0,5))) {
+                        const item = (countryMigrationData[2025] || []).find(i => i.name.toLowerCase().includes(c.substring(0,5)));
+                        reply = `<b>Внешний вектор (${c.toUpperCase()}):</b><br>Сальдо 2025: ${item ? item.value : 'н/д'}.`;
+                        break;
+                    }
+                }
+            }
+
+            // 3) прогнозы
+            if (!reply && (lower.includes('прогноз') || lower.includes('будущее'))) {
+                const baseVal = (typeof migrationBalanceData !== 'undefined') ? migrationBalanceData.find(d=>d.year===2025).value : 5210;
+                const opt = Math.round(baseVal * 1.15);
+                const pes = Math.round(baseVal * 0.92);
+                reply = `Модель видит оптимистичный сценарий до <b>${opt}</b> и пессимистичный — около <b>${pes}</b> при рисках инфраструктуры/воды.`;
+            }
+
+            // 4) год в тексте (4 цифры)
+            if (!reply) {
+                const yearMatch = lower.match(/\d{4}/);
+                if (yearMatch) {
+                    const year = parseInt(yearMatch[0], 10);
+                    const d = (typeof migrationBalanceData !== 'undefined') ? migrationBalanceData.find(i => i.year === year) : null;
+                    if (d) reply = `В ${year} году сальдо составило ${d.value}.`;
+                    else reply = `Данных по ${year} нет в локальном наборе.`;
+                }
+            }
+
+            // 5) общий ответ по умолчанию
+            if (!reply) {
+                reply = "Я изучила ваш запрос. О каком конкретном районе или периоде (2000–2025) предоставить отчет?";
+            }
+
+            appendMessage(`<b>АЛМА:</b><br>${reply}`, 'alma');
+        }, 700);
+    }
+
+    // подписываемся только один раз (важно — удалите любые дубликаты ниже в файле)
+    btn.addEventListener('click', handleSend);
+    inp.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSend(); });
+}
+
 
             function addMsg(text, sender) {
                 const d = document.createElement('div');
