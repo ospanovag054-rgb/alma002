@@ -180,26 +180,23 @@
         /* --- ЧАТ БОТ (АЛМА) --- */
        .chat-widget {
             position: fixed; bottom: 30px; right: 30px; width: 400px; height: 600px;
-            display: flex; flex-direction: column; 
-            z-index: 200; /* Поднимаем выше кнопки вызова */
+            display: flex; flex-direction: column; z-index: 9999; /* Очень высокий приоритет */
             transform: translateY(120%); transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
             border: 1px solid rgba(59, 130, 246, 0.4);
-            pointer-events: none; /* Игнорирует клики, когда закрыт */
-            background: rgba(13, 20, 35, 0.95);
-            border-radius: 24px;
-            backdrop-filter: blur(15px);
+            background: rgba(13, 20, 35, 0.98); border-radius: 24px;
+            backdrop-filter: blur(20px);
+            pointer-events: none; /* Не мешает кликам, пока закрыт */
         }
         .chat-widget.open { 
             transform: translateY(0); 
-            pointer-events: auto; /* Начинает принимать клики, когда открыт */
+            pointer-events: auto; /* Начинает работать, когда открыт */
         }
         
         .chat-toggle-btn {
             position: fixed; bottom: 30px; right: 30px; width: 65px; height: 65px;
             background: var(--primary); border-radius: 50%; border: none; cursor: pointer;
             box-shadow: 0 0 30px var(--primary-glow); 
-            z-index: 150; /* Ниже открытого окна чата */
-            transition: 0.4s;
+            z-index: 9998; /* Чуть ниже самого окна чата */
             display: flex; align-items: center; justify-content: center; font-size: 1.8rem; color: white;
         }
         .chat-header {
