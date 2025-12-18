@@ -99,17 +99,28 @@
         }
 
         /* --- ALMA SIDEBAR --- */
-        .chat-container {
-            z-index: 1000; /* Чтобы чат всегда был сверху */
-        }
+        /* Исправляем перекрытие кнопок */
+.chat-container {
+    z-index: 10000 !important;
+    pointer-events: none; /* Контейнер прозрачен для кликов */
+}
 
-       /* Сместим кнопку чата чуть правее или ниже, чтобы она не перекрывала инпут */
-        .chat-toggle {
-            bottom: 20px;
-            right: 20px;
-            z-index: 1001;
-        }
-        
+.chat-window {
+    pointer-events: auto; /* А само окно принимает клики */
+}
+
+.chat-toggle {
+    z-index: 10001 !important;
+    pointer-events: auto;
+    bottom: 20px;
+    right: 20px;
+}
+
+/* Фикс для кнопки внутри чата */
+.chat-input-area button {
+    cursor: pointer;
+    z-index: 10;
+}
         .alma-avatar {
             overflow: hidden; padding: 0; position: relative;
             border: 1px solid rgba(59, 130, 246, 0.3);
